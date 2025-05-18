@@ -6,7 +6,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { useToast } from '@/components/ui/use-toast';
 import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
 import { Check } from "lucide-react"
@@ -21,7 +20,6 @@ type NewsletterFormData = z.infer<typeof newsletterSchema>;
 
 export default function NewsletterPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { toast } = useToast();
   
   const {
     register,
@@ -37,19 +35,9 @@ export default function NewsletterPage() {
     try {
       // Here you would typically make an API call to your backend
       console.log('Form submitted:', data);
-      
-      toast({
-        title: 'Success!',
-        description: 'Thank you for subscribing to our newsletter.',
-      });
-      
       reset();
     } catch (error) {
-      toast({
-        title: 'Error',
-        description: 'Something went wrong. Please try again.',
-        variant: 'destructive',
-      });
+      console.error('Error submitting form:', error);
     } finally {
       setIsSubmitting(false);
     }
