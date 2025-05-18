@@ -258,11 +258,11 @@ export default function NewsletterBuilderPage() {
   )
 }
 
-type BlockType = "header" | "text" | "image" | "button" | "divider" | "quote" | "list" | "columns"
+type BlockType = "header" | "text" | "image" | "button" | "divider" | "quote" | "list" | "columns" | "layout"
 
 interface Block {
   id: string
   type: BlockType
   content: string
-  settings: any
+  settings?: any
 }
