@@ -8,9 +8,10 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Search, ArrowRight, Calendar, Clock, User } from "lucide-react"
 import BackButton from "@/components/back-button"
+import { Textarea } from "@/components/ui/textarea"
 
 export default function BlogPage() {
-  const posts = [
+  const [posts, setPosts] = useState([
     {
       id: 1,
       title: "The Art of Showing Up: Running and Life's Daily Battles",
@@ -71,7 +72,41 @@ export default function BlogPage() {
       category: "Nutrition",
       image: "https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=800&q=80",
     },
-  ]
+  ])
+
+  const [showAddBlog, setShowAddBlog] = useState(false)
+  const [newBlog, setNewBlog] = useState({
+    title: '',
+    excerpt: '',
+    author: '',
+    category: 'Mindset',
+    image: 'https://images.unsplash.com/photo-1571008887538-b36bb32f4571?w=800&q=80',
+  })
+
+  const handleAddBlog = () => {
+    if (!newBlog.title || !newBlog.excerpt || !newBlog.author) return
+
+    const blog = {
+      id: posts.length + 1,
+      title: newBlog.title,
+      excerpt: newBlog.excerpt,
+      author: newBlog.author,
+      date: new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }),
+      readTime: `${Math.ceil(newBlog.excerpt.split(' ').length / 200)} min read`,
+      category: newBlog.category,
+      image: newBlog.image,
+    }
+
+    setPosts([blog, ...posts])
+    setShowAddBlog(false)
+    setNewBlog({
+      title: '',
+      excerpt: '',
+      author: '',
+      category: 'Mindset',
+      image: 'https://images.unsplash.com/photo-1571008887538-b36bb32f4571?w=800&q=80',
+    })
+  }
 
   const categories = ["All Posts", "Mindset", "Training", "Nutrition", "Gear", "Race Reports", "Beginners"]
 
@@ -160,21 +195,72 @@ export default function BlogPage() {
               your next marathon, we've got you covered.
             </motion.p>
           </div>
+          <div className="flex gap-4 items-center">
+            <motion.div
+              style={{ y: springFloatY }}
+              className="w-full md:w-64 relative"
+              whileHover={{ scale: 1.02 }}
+              transition={{ type: "spring", stiffness: 300 }}
+            >
+              <div className="relative max-w-xl mx-auto mb-8">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-neutral-400" />
+                <Input
+                  placeholder="Search articles..."
+                  className="pl-10 bg-neutral-50 border-neutral-200 transition-all hover:shadow-md focus:shadow-md rounded-full text-black"
+                />
+              </div>
+            </motion.div>
+            <Button 
+              onClick={() => setShowAddBlog(!showAddBlog)}
+              className="bg-[#2432C5] text-white hover:bg-[#2432C5]/90"
+            >
+              {showAddBlog ? 'Cancel' : 'Add Blog'}
+            </Button>
+          </div>
+        </motion.div>
+
+        {showAddBlog && (
           <motion.div
-            style={{ y: springFloatY }}
-            className="w-full md:w-64 relative"
-            whileHover={{ scale: 1.02 }}
-            transition={{ type: "spring", stiffness: 300 }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-8 p-6 bg-white rounded-lg shadow-lg border border-neutral-200"
           >
-            <div className="relative max-w-xl mx-auto mb-8">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-neutral-400" />
+            <h2 className="text-2xl font-bold mb-4">Add New Blog Post</h2>
+            <div className="space-y-4">
               <Input
-                placeholder="Search articles..."
-                className="pl-10 bg-neutral-50 border-neutral-200 transition-all hover:shadow-md focus:shadow-md rounded-full text-black"
+                placeholder="Blog Title"
+                value={newBlog.title}
+                onChange={(e) => setNewBlog({ ...newBlog, title: e.target.value })}
               />
+              <Textarea
+                placeholder="Blog Excerpt"
+                value={newBlog.excerpt}
+                onChange={(e) => setNewBlog({ ...newBlog, excerpt: e.target.value })}
+                className="min-h-[100px]"
+              />
+              <Input
+                placeholder="Author Name"
+                value={newBlog.author}
+                onChange={(e) => setNewBlog({ ...newBlog, author: e.target.value })}
+              />
+              <select
+                value={newBlog.category}
+                onChange={(e) => setNewBlog({ ...newBlog, category: e.target.value })}
+                className="w-full p-2 border rounded-md"
+              >
+                {categories.filter(cat => cat !== "All Posts").map(category => (
+                  <option key={category} value={category}>{category}</option>
+                ))}
+              </select>
+              <Button 
+                onClick={handleAddBlog}
+                className="w-full bg-[#2432C5] text-white hover:bg-[#2432C5]/90"
+              >
+                Add Blog Post
+              </Button>
             </div>
           </motion.div>
-        </motion.div>
+        )}
 
         {/* Featured Post */}
         <motion.div

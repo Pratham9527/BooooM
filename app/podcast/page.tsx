@@ -13,6 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import Lenis from "lenis"
+import { Textarea } from "@/components/ui/textarea"
 
 interface Podcast {
   id: string;
@@ -174,6 +175,16 @@ export default function PodcastPage() {
   const [timestamps, setTimestamps] = useState<{ [key: string]: number[] }>({});
   const [selectedPodcast, setSelectedPodcast] = useState<Podcast | null>(null);
   const [showDetails, setShowDetails] = useState(false);
+  const [showAddPodcast, setShowAddPodcast] = useState(false);
+  const [newPodcast, setNewPodcast] = useState<Partial<Podcast>>({
+    title: '',
+    description: '',
+    duration: '',
+    date: new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }),
+    audioUrl: '',
+    category: 'Mindset',
+    host: '',
+  });
 
   const filteredPodcasts = podcasts.filter(podcast =>
     podcast.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -294,6 +305,34 @@ export default function PodcastPage() {
     setShowDetails(true);
   };
 
+  const handleAddPodcast = () => {
+    if (!newPodcast.title || !newPodcast.description || !newPodcast.audioUrl || !newPodcast.host) return;
+
+    const podcast: Podcast = {
+      id: `${Date.now()}`,
+      title: newPodcast.title,
+      description: newPodcast.description,
+      duration: newPodcast.duration || '00:00',
+      date: newPodcast.date || new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }),
+      audioUrl: newPodcast.audioUrl,
+      category: newPodcast.category || 'Mindset',
+      host: newPodcast.host,
+      image: newPodcast.image || 'https://images.unsplash.com/photo-1571008887538-b36bb32f4571?w=1200&q=80',
+    };
+
+    setPodcasts([podcast, ...podcasts]);
+    setShowAddPodcast(false);
+    setNewPodcast({
+      title: '',
+      description: '',
+      duration: '',
+      date: new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }),
+      audioUrl: '',
+      category: 'Mindset',
+      host: '',
+    });
+  };
+
   useEffect(() => {
     const lenis = new Lenis({
       duration: 1.2,
@@ -320,6 +359,65 @@ export default function PodcastPage() {
     <div className="flex flex-col min-h-screen bg-white overflow-x-hidden">
       <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
         <BackButton />
+
+        <div className="flex justify-between items-center mb-8">
+          <h1 className="text-4xl font-bold">Podcasts</h1>
+          <Button 
+            onClick={() => setShowAddPodcast(!showAddPodcast)}
+            className="bg-[#2432C5] text-white hover:bg-[#2432C5]/90"
+          >
+            {showAddPodcast ? 'Cancel' : 'Add Podcast'}
+          </Button>
+        </div>
+
+        {showAddPodcast && (
+          <div className="mb-8 p-6 bg-white rounded-lg shadow-lg border border-neutral-200">
+            <h2 className="text-2xl font-bold mb-4">Add New Podcast</h2>
+            <div className="space-y-4">
+              <Input
+                placeholder="Podcast Title"
+                value={newPodcast.title}
+                onChange={(e) => setNewPodcast({ ...newPodcast, title: e.target.value })}
+              />
+              <Textarea
+                placeholder="Podcast Description"
+                value={newPodcast.description}
+                onChange={(e) => setNewPodcast({ ...newPodcast, description: e.target.value })}
+                className="min-h-[100px]"
+              />
+              <Input
+                placeholder="Audio URL"
+                value={newPodcast.audioUrl}
+                onChange={(e) => setNewPodcast({ ...newPodcast, audioUrl: e.target.value })}
+              />
+              <Input
+                placeholder="Host Name"
+                value={newPodcast.host}
+                onChange={(e) => setNewPodcast({ ...newPodcast, host: e.target.value })}
+              />
+              <Input
+                placeholder="Duration (e.g., 45:32)"
+                value={newPodcast.duration}
+                onChange={(e) => setNewPodcast({ ...newPodcast, duration: e.target.value })}
+              />
+              <select
+                value={newPodcast.category}
+                onChange={(e) => setNewPodcast({ ...newPodcast, category: e.target.value })}
+                className="w-full p-2 border rounded-md"
+              >
+                {categories.filter(cat => cat !== "All Episodes").map(category => (
+                  <option key={category} value={category}>{category}</option>
+                ))}
+              </select>
+              <Button 
+                onClick={handleAddPodcast}
+                className="w-full bg-[#2432C5] text-white hover:bg-[#2432C5]/90"
+              >
+                Add Podcast
+              </Button>
+            </div>
+          </div>
+        )}
 
         {/* Function Panel */}
         <motion.div
